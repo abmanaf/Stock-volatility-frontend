@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export interface FitPayload {
   ticker: string;
@@ -6,6 +6,7 @@ export interface FitPayload {
   n_observations: number;
   p: number;
   q: number;
+  arima_order?: [number, number, number];
 }
 
 export interface FitResponse {
@@ -14,6 +15,7 @@ export interface FitResponse {
   n_observations: number;
   p: number;
   q: number;
+  arima_order?: [number, number, number];
   success: boolean;
   message: string;
 }
@@ -21,11 +23,13 @@ export interface FitResponse {
 export interface PredictPayload {
   ticker: string;
   n_days: number;
+  predict_type?: "volatility" | "returns";
 }
 
 export interface PredictResponse {
   ticker: string;
   n_days: number;
+  predict_type: string;
   success: boolean;
   forecast: Record<string, number>;
   message: string;
@@ -44,8 +48,6 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  // hello: () => request<{ message: string }>("/hello"),
-
   fit: (payload: FitPayload) =>
     request<FitResponse>("/fit", {
       method: "POST",

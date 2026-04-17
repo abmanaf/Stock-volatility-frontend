@@ -14,4 +14,5 @@ export {
   TrendingUp,
   XCircle,
   Zap,
+  TrendingDown,
 } from "lucide-react";

@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Loader2, TrendingUp } from "@/atoms/icon";
+import { Loader2, TrendingUp, TrendingDown } from "@/atoms/icon";
 import { PageHeader } from "@/organisms/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { VolatilityChart } from "@/organisms/volatility-chart";
 import { ErrorCard } from "@/organisms/error-card";
 import { api, PredictResponse } from "@/lib/api";
@@ -17,6 +18,7 @@ import { Label } from "@/components/ui/label";
 interface FormValues {
   ticker: string;
   n_days: number;
+  predict_type: "volatility" | "returns";
 }
 
 export function PredictTemplate() {
@@ -33,7 +35,11 @@ export function PredictTemplate() {
     setValue,
     formState: { isSubmitting },
   } = useForm<FormValues>({
-    defaultValues: { ticker: lastFit?.ticker || "AAPL", n_days: 5 },
+    defaultValues: {
+      ticker: lastFit?.ticker || "AAPL",
+      n_days: 5,
+      predict_type: "volatility",
+    },
   });
 
   const validateForm = (data: FormValues): Record<string, string> => {
@@ -55,7 +61,11 @@ export function PredictTemplate() {
     setIsLoading(true);
     setResult(null);
     try {
-      const res = await api.predict(data);
+      const res = await api.predict({
+        ticker: data.ticker,
+        n_days: data.n_days,
+        predict_type: data.predict_type,
+      });
       setResult(res);
       addPredictResult({ ...res, timestamp: new Date().toISOString() });
     } catch (err) {
@@ -71,14 +81,18 @@ export function PredictTemplate() {
   }
 
   const n_days = watch("n_days");
+  const predict_type = watch("predict_type");
+
+  const pageTitle =
+    predict_type === "returns" ? "Predict Returns" : "Predict Volatility";
+  const pageSubtitle =
+    predict_type === "returns"
+      ? "Generate a multi-day return forecast using ARIMA model"
+      : "Generate a multi-day volatility forecast from a trained GARCH model";
 
   return (
     <div className="flex flex-col min-h-screen">
-      <PageHeader
-        title="Predict Volatility"
-        subtitle="Generate a multi-day volatility forecast from a trained model"
-        badge="PREDICT"
-      />
+      <PageHeader title={pageTitle} subtitle={pageSubtitle} badge="PREDICT" />
       <main className="flex-1 p-6">
         <div className="max-w-5xl mx-auto">
           <div className="grid lg:grid-cols-[380px_1fr] gap-6 items-start">
@@ -163,6 +177,41 @@ export function PredictTemplate() {
                       Number of business days ahead to forecast
                     </p>
                   </div>
+                  <Separator className="bg-border/60" />
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="mono text-xs uppercase tracking-widest text-muted-foreground">
+                        Prediction Type
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`mono text-xs ${predict_type === "volatility" ? "text-[hsl(var(--purple))]" : "text-muted-foreground/40"}`}
+                        >
+                          Vol
+                        </span>
+                        <Switch
+                          checked={predict_type === "returns"}
+                          onCheckedChange={(checked) =>
+                            setValue(
+                              "predict_type",
+                              checked ? "returns" : "volatility",
+                            )
+                          }
+                          className="data-[checked]:bg-[hsl(var(--green))]"
+                        />
+                        <span
+                          className={`mono text-xs ${predict_type === "returns" ? "text-[hsl(var(--green))]" : "text-muted-foreground/40"}`}
+                        >
+                          Returns
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground/60">
+                      {predict_type === "volatility"
+                        ? "Forecast expected volatility (σ) using GARCH"
+                        : "Forecast expected daily returns (%) using ARIMA"}
+                    </p>
+                  </div>
                   <Button
                     type="submit"
                     disabled={isLoading}
@@ -175,7 +224,11 @@ export function PredictTemplate() {
                       </>
                     ) : (
                       <>
-                        <TrendingUp className="w-4 h-4 mr-2" />
+                        {predict_type === "volatility" ? (
+                          <TrendingUp className="w-4 h-4 mr-2" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 mr-2" />
+                        )}
                         Generate Forecast
                       </>
                     )}
@@ -228,6 +281,9 @@ export function PredictTemplate() {
                       <VolatilityChart
                         forecast={result.forecast}
                         ticker={result.ticker}
+                        predictType={
+                          result.predict_type as "volatility" | "returns"
+                        }
                       />
                     </div>
                   ) : (

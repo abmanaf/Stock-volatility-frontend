@@ -20,6 +20,9 @@ interface FormValues {
   n_observations: number;
   p: number;
   q: number;
+  arima_p: number;
+  arima_d: number;
+  arima_q: number;
 }
 
 export function FitTemplate() {
@@ -41,6 +44,9 @@ export function FitTemplate() {
       n_observations: 1000,
       p: 1,
       q: 1,
+      arima_p: 1,
+      arima_d: 0,
+      arima_q: 1,
     },
   });
 
@@ -68,7 +74,19 @@ export function FitTemplate() {
     setIsLoading(true);
     setResult(null);
     try {
-      const res = await api.fit(data);
+      const payload = {
+        ticker: data.ticker,
+        use_new_data: data.use_new_data,
+        n_observations: data.n_observations,
+        p: data.p,
+        q: data.q,
+        arima_order: [data.arima_p, data.arima_d, data.arima_q] as [
+          number,
+          number,
+          number,
+        ],
+      };
+      const res = await api.fit(payload);
       setResult(res);
       addFitResult({ ...res, timestamp: new Date().toISOString() });
     } catch (err) {
@@ -94,7 +112,7 @@ export function FitTemplate() {
       <main className="flex-1 p-6">
         <div className="max-w-2xl mx-auto space-y-6">
           <InfoBanner
-            title="GARCH Model Training"
+            title="GARCH and ARIMA Model Training"
             description="Fill in the equity ticker and model parameters. Enable use_new_data to fetch fresh prices from AlphaVantage. The model will be saved locally for subsequent forecasting."
           />
           <div className="rounded-xl border border-border bg-card p-6 animate-fade-up delay-100">
@@ -160,7 +178,7 @@ export function FitTemplate() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="mono text-xs uppercase tracking-widest text-muted-foreground">
-                    ARCH Order (p)
+                    GARCH Order (p)
                   </Label>
                   <Input
                     type="number"
@@ -173,9 +191,10 @@ export function FitTemplate() {
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground/60">
-                    Lag order of innovation
+                    Lag order of ARCH term
                   </p>
                 </div>
+
                 <div className="space-y-2">
                   <Label className="mono text-xs uppercase tracking-widest text-muted-foreground">
                     GARCH Order (q)
@@ -191,9 +210,58 @@ export function FitTemplate() {
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground/60">
-                    Lag order of volatility
+                    Lag order of GARCH term
                   </p>
                 </div>
+              </div>
+              <Separator className="bg-border/60" />
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Label className="mono text-xs uppercase tracking-widest text-muted-foreground">
+                    ARIMA Order
+                  </Label>
+                  <span className="mono text-[10px] text-muted-foreground/60">
+                    (p, d, q)
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1.5">
+                    <Input
+                      type="number"
+                      {...register("arima_p", { setValueAs: (v) => Number(v) })}
+                      placeholder="p"
+                      className="mono bg-muted/30 border-border text-foreground focus-visible:ring-[hsl(var(--cyan))] h-10 text-center"
+                    />
+                    <p className="mono text-[9px] text-muted-foreground/40 text-center">
+                      AR
+                    </p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Input
+                      type="number"
+                      {...register("arima_d", { setValueAs: (v) => Number(v) })}
+                      placeholder="d"
+                      className="mono bg-muted/30 border-border text-foreground focus-visible:ring-[hsl(var(--cyan))] h-10 text-center"
+                    />
+                    <p className="mono text-[9px] text-muted-foreground/40 text-center">
+                      Diff
+                    </p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Input
+                      type="number"
+                      {...register("arima_q", { setValueAs: (v) => Number(v) })}
+                      placeholder="q"
+                      className="mono bg-muted/30 border-border text-foreground focus-visible:ring-[hsl(var(--cyan))] h-10 text-center"
+                    />
+                    <p className="mono text-[9px] text-muted-foreground/40 text-center">
+                      MA
+                    </p>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground/60">
+                  ARIMA model for returns prediction (default: 1,0,1)
+                </p>
               </div>
               <Button
                 type="submit"
@@ -208,7 +276,7 @@ export function FitTemplate() {
                 ) : (
                   <>
                     <BrainCircuit className="w-4 h-4 mr-2" />
-                    Train GARCH Model
+                    Train Model
                   </>
                 )}
               </Button>

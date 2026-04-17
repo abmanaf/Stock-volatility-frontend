@@ -76,8 +76,7 @@ export function DashboardTemplate() {
     <div className="flex flex-col min-h-screen">
       <PageHeader
         title="Dashboard"
-        subtitle="GARCH Volatility Forecasting"
-        // badge="LIVE"
+        subtitle="GARCH Volatility and ARIMA Returns Forecasting"
       />
       <main className="flex-1 p-6 space-y-8">
         <div className="relative overflow-hidden rounded-2xl border border-[hsl(195,100%,55%/0.2)] bg-gradient-to-br from-[hsl(222,47%,10%)] to-[hsl(222,47%,8%)] p-8 noise dot-grid animate-fade-up">
@@ -89,12 +88,12 @@ export function DashboardTemplate() {
                 {/* <span className="mono text-[10px] uppercase tracking-widest text-[hsl(var(--green))]">System Online</span> */}
               </div>
               <h2 className="text-3xl font-semibold text-foreground leading-tight">
-                Predict market
+                Predict market volatility and
                 <br />
                 <span className="text-glow-cyan text-[hsl(var(--cyan))]">
-                  volatility
+                  returns
                 </span>{" "}
-                with GARCH
+                with GARCH and ARIMA
               </h2>
               <p className="text-sm text-muted-foreground max-w-md">
                 Train GARCH(p,q) models on equity data and generate multi-day

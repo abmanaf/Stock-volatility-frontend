@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# VolatilityLab — GARCH Dashboard
+
+A full-stack web application for training GARCH(p,q) volatility models and generating multi-day volatility forecasts for equities.
+
+## Tech Stack
+
+- **Frontend:** Next.js 16, React 19, TypeScript, Tailwind CSS
+- **Backend:** FastAPI, Python, SQLite
+- **ML:** `arch` library for GARCH modeling
+- **Data:** AlphaVantage API for stock prices
+
+## Project Structure (Atomic Design)
+
+```
+src/
+├── atoms/              # Basic UI primitives (Button, Input, Icon, etc.)
+├── molecules/         # Simple component combinations (StatCard, MetricBox, etc.)
+├── organisms/          # Complex UI components (AppSidebar, VolatilityChart)
+├── templates/         # Page layouts (Dashboard, Fit, Predict)
+├── app/              # Next.js routes
+├── store/            # Zustand state management
+└── lib/              # API client & utilities
+```
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- Python 3.10+
+- AlphaVantage API key
+
+### Backend Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd stock-backend
+
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# or venv\Scripts\activate  # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the backend
+python -m uvicorn main:app --reload --host localhost --port 8000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Frontend Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cd stock-frontend
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Install dependencies
+pnpm install
 
-## Learn More
+# Run the development server
+pnpm dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000) to view the dashboard.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Train GARCH Model**
+   - Enter ticker symbol (e.g., AAPL, MSFT, TSLA)
+   - Configure observations (50-5000 trading days)
+   - Set ARCH (p) and GARCH (q) order parameters
+   - Fetch fresh data from AlphaVantage or use cached data
 
-## Deploy on Vercel
+2. **Generate Volatility Forecast**
+   - Load a previously trained model
+   - Select forecast horizon (1-30 business days)
+   - View interactive volatility chart with data table
+   - See peak and floor volatility values
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. **Dashboard**
+   - View model training and prediction history
+   - See recent activity with success/failure status
+   - Quick actions to navigate between features
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/hello` | GET | Health check |
+| `/fit` | POST | Train GARCH model |
+| `/predict` | POST | Generate volatility forecast |
+
+## Environment Variables
+
+### Backend (.env)
+```
+ALPHA_API_KEY=your_alpha_vantage_key
+DB_NAME=stocks.sqlite
+MODEL_DIRECTORY=models
+```
+
+### Frontend
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+## License
+
+MIT

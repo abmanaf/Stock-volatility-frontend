@@ -6,7 +6,7 @@ interface ErrorCardProps {
 
 export function ErrorCard({ message }: ErrorCardProps) {
   return (
-    <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 space-y-4 noise">
+    <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 space-y-4 dot-grid noise animate-fade-in">
       <div className="flex items-center gap-3">
         <AlertCircle className="w-5 h-5 text-destructive shrink-0" />
         <div>

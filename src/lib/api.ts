@@ -1,4 +1,4 @@
-export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://vineyard-outback-favorite.ngrok-free.dev";
 
 export interface FitPayload {
   ticker: string;
